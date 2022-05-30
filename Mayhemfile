@@ -1,0 +1,6 @@
+project: rnshah9/kcov
+target: line2addr
+tests: null
+
+cmds:
+  - cmd: /src/tools/build/line2addr @@ a

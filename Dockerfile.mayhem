@@ -1,0 +1,23 @@
+FROM debian:bullseye-slim AS builder
+
+RUN apt-get update && \
+    apt-get install -y \
+    binutils-dev \
+    build-essential \
+    cmake \
+    git \
+    libcurl4-openssl-dev \
+    libdw-dev \
+    libiberty-dev \
+    libssl-dev \
+    ninja-build \
+    python3 \
+    zlib1g-dev \
+    ;
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y pkg-config
+
+COPY . /src/
+WORKDIR /src/tools/build
+
+RUN cmake -G 'Ninja' .. && \
+    cmake --build .
