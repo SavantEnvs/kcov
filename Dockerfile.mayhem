@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim AS builder
+FROM debian:bullseye-slim as builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -21,3 +21,12 @@ WORKDIR /src/tools/build
 
 RUN cmake -G 'Ninja' .. && \
     cmake --build .
+
+RUN mkdir -p /deps
+RUN ldd /src/tools/build/line2addr | tr -s '[:blank:]' '\n' | grep '^/' | xargs -I % sh -c 'cp % /deps;'
+
+FROM debian:bullseye-slim as package
+
+COPY --from=builder /deps /deps
+COPY --from=builder /src/tools/build/line2addr /src/tools/build/line2addr
+ENV LD_LIBRARY_PATH=/deps
