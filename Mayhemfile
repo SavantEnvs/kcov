@@ -2,4 +2,4 @@ project: kcov
 target: line2addr
 
 cmds:
-  - cmd: /src/tools/build/line2addr @@ a
+  - cmd: /line2addr @@ a

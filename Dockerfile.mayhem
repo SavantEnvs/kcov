@@ -19,14 +19,11 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y pkg-config
 COPY . /src/
 WORKDIR /src/tools/build
 
-RUN cmake -G 'Ninja' .. && \
-    cmake --build .
-
-RUN mkdir -p /deps
-RUN ldd /src/tools/build/line2addr | tr -s '[:blank:]' '\n' | grep '^/' | xargs -I % sh -c 'cp % /deps;'
+RUN cmake -G 'Ninja' ..
+RUN ninja
+    
 
 FROM debian:bullseye-slim as package
-
-COPY --from=builder /deps /deps
-COPY --from=builder /src/tools/build/line2addr /src/tools/build/line2addr
-ENV LD_LIBRARY_PATH=/deps
+RUN apt-get update && \
+    apt-get install -y libdw-dev libelf-dev libcurl4-openssl-dev
+COPY --from=builder /src/tools/build/line2addr /
