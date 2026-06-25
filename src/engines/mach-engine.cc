@@ -69,8 +69,8 @@ constexpr auto regs_flavor = ARM_THREAD_STATE64;
 #endif
 
 
-constexpr uint32_t
-getAligned(uint32_t addr)
+constexpr unsigned long
+getAligned(unsigned long addr)
 {
     return (addr / sizeof(uint32_t)) * sizeof(uint32_t);
 }
