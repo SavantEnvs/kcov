@@ -544,6 +544,18 @@ class bash_heredoc_with_space(libkcov.TestCase):
         assert cobertura.hitsPerLine(dom, "shell-main", 202) is None
 
 
+class bash_quoted_left_shift_is_not_heredoc(libkcov.TestCase):
+    def runTest(self):
+        rv, o = self.do(
+            self.kcov + " " + self.outbase + "/kcov " + self.sources + "/tests/bash/shell-main"
+        )
+
+        dom = cobertura.parseFile(self.outbase + "/kcov/shell-main/cobertura.xml")
+
+        assert cobertura.hitsPerLine(dom, "shell-main", 208) == 1
+        assert cobertura.hitsPerLine(dom, "shell-main", 210) == 1
+
+
 class bash_subshell_function(libkcov.TestCase):
     def runTest(self):
         rv, o = self.do(
