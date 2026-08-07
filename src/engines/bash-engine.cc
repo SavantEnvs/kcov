@@ -643,6 +643,7 @@ private:
 	size_t findHeredocStart(const std::string &s, char &quoteChar)
 	{
 		bool escaped = false;
+		int bracketDepth = 0;
 
 		for (size_t i = 0; i < s.size(); i++)
 		{
@@ -673,8 +674,30 @@ private:
 				continue;
 			}
 
+			// Array subscripts are arithmetic contexts, so a '<<' inside one
+			// is a left shift and not a here document redirection
+			if (c == '[')
+			{
+				bracketDepth++;
+				continue;
+			}
+
+			if (c == ']' && bracketDepth > 0)
+			{
+				bracketDepth--;
+				continue;
+			}
+
 			if (c == '<' && i + 1 < s.size() && s[i + 1] == '<')
+			{
+				if (bracketDepth > 0)
+				{
+					i++;
+					continue;
+				}
+
 				return i;
+			}
 		}
 
 		return std::string::npos;

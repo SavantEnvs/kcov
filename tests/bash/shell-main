@@ -208,3 +208,9 @@ echo "left shift
 echo "after multiline quote"
 echo "<< EOF"
 echo "after quoted marker"
+
+# Issue #494: << inside an array subscript is a left shift, not a heredoc
+declare -a shift_arr
+declare -i shift_v=1
+shift_arr[shift_v << 3 | 1]=7
+echo "after subscript left shift"
