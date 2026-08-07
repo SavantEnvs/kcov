@@ -640,15 +640,56 @@ private:
 		}
 	}
 
+	size_t findHeredocStart(const std::string &s, char &quoteChar)
+	{
+		bool escaped = false;
+
+		for (size_t i = 0; i < s.size(); i++)
+		{
+			const char c = s[i];
+
+			if (escaped)
+			{
+				escaped = false;
+				continue;
+			}
+
+			if (c == '\\' && quoteChar != '\'')
+			{
+				escaped = true;
+				continue;
+			}
+
+			if (quoteChar != '\0')
+			{
+				if (c == quoteChar)
+					quoteChar = '\0';
+				continue;
+			}
+
+			if (c == '"' || c == '\'')
+			{
+				quoteChar = c;
+				continue;
+			}
+
+			if (c == '<' && i + 1 < s.size() && s[i + 1] == '<')
+				return i;
+		}
+
+		return std::string::npos;
+	}
+
 	void parseFileFull(const std::string &filename, const std::vector<std::string> &lines, uint32_t crc)
 	{
 		unsigned int lineNo = 0;
 		enum
 		{
-			none, backslash, quote, heredoc
+			none, backslash, heredoc
 		} state = none;
 		bool caseActive = false;
 		bool arithmeticActive = false;
+		char quoteChar = '\0';
 		std::string heredocMarker;
 
 		for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
@@ -731,15 +772,6 @@ private:
 				continue;
 			}
 
-			// Multi-line quote - only the last line is code
-			if (state == quote)
-			{
-				if (s.find('"') == s.size() - 1) // String ends with "
-					state = none;
-				else
-					continue;
-			}
-
 			// HERE documents
 			if (state == heredoc)
 			{
@@ -750,6 +782,12 @@ private:
 				continue;
 			}
 
+			size_t heredocStart = findHeredocStart(s, quoteChar);
+
+			// Multi-line quote - only the last line is code
+			if (quoteChar != '\0')
+				continue;
+
 			if (s.find("$((") != std::string::npos || s.find("$[") != std::string::npos)
 				arithmeticActive = true;
 
@@ -757,16 +795,8 @@ private:
 			{
 				state = backslash;
 			}
-			else if ((s.find("=\"") != std::string::npos || // Handle multi-line string assignments
-					s.find("= \"") != std::string::npos) && std::count(s.begin(), s.end(), '"') == 1)
-			{
-				state = quote;
-				continue;
-			}
 			else
 			{
-				size_t heredocStart = s.find("<<");
-
 				if (!arithmeticActive && s.find("let ") != 0 && s.find("$((") == std::string::npos
 						&& s.find("))") == std::string::npos && heredocStart != std::string::npos)
 				{

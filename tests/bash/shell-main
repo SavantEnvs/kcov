@@ -200,3 +200,11 @@ cat <<- "EOF"
 foo
 bar
 EOF
+
+# Issues #472 and #494: quoted << operators are not heredocs
+echo "left shift
+1 << 2
+"
+echo "after multiline quote"
+echo "<< EOF"
+echo "after quoted marker"
