@@ -1,0 +1,11 @@
+project: savantenvs/kcov
+target: line2addr
+
+cmds:
+  - cmd: /mayhem/line2addr @@ a
+    # ASan-instrumented binary needs more than Mayhem's default 2s smoke timeout
+    timeout: 10
+
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/line2addr/testsuite
