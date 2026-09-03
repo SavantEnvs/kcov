@@ -118,6 +118,16 @@ public:
 		unsigned int pid = IConfiguration::getInstance().keyAsInt("attach-pid");
 		bool res = false;
 
+		auto asan_options_str = getenv("ASAN_OPTIONS");
+		std::string asan_options;
+
+		if (asan_options_str == nullptr)
+			asan_options = "ASAN_OPTIONS=verify_asan_link_order=0";
+		else
+			asan_options = std::string("ASAN_OPTIONS=") + asan_options_str + ":verify_asan_link_order=0";
+
+		// Update ASAN_OPTIONS to ignore link order (since kcov preloads a library)
+		putenv(asan_options.data());
 		if (pid != 0)
 			res = attachPid(pid);
 		else
